@@ -1,0 +1,74 @@
+#!/bin/sh
+
+### BEGIN INIT INFO
+# Provides:	     pganalyze-collector
+# Required-Start:    $local_fs $remote_fs $network $syslog $named
+# Required-Stop:     $local_fs $remote_fs $network $syslog $named
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: starts the pganalyze collector monitor service
+# Description:       See pganalyze.com
+### END INIT INFO
+
+PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
+DAEMON=/usr/bin/pganalyze-collector
+NAME=pganalyze
+DESC=pganalyze-collector
+PID=/var/run/pganalyze-collector.pid
+
+test -x $DAEMON || { log_daemon_msg "$DAEMON not found" "$NAME"; exit 1; }
+
+. /lib/init/vars.sh
+. /lib/lsb/init-functions
+
+do_start()
+{
+	start-stop-daemon --start --make-pidfile --pidfile $PID --chuid $NAME --background --exec $DAEMON
+}
+
+do_stop()
+{
+	start-stop-daemon --stop --retry=QUIT/10/KILL/10 --pidfile $PID
+	RETVAL="$?"
+	return "$RETVAL"
+}
+
+do_reload() {
+	start-stop-daemon --stop --signal HUP --quiet --pidfile $PID --name $NAME
+}
+
+case "$1" in
+	start)
+		log_daemon_msg "Starting $DESC" "$NAME"
+		do_start
+		;;
+	stop)
+		log_daemon_msg "Stopping $DESC" "$NAME"
+		do_stop
+		;;
+	restart)
+		log_daemon_msg "Restarting $DESC" "$NAME"
+
+		do_stop
+		case "$?" in
+			0|1)
+				do_start
+			*)
+				log_end_msg 1
+				;;
+		esac
+		;;
+	reload)
+		log_daemon_msg "Reloading $DESC" "$NAME"
+		do_reload
+		;;
+	status)
+		status_of_proc -p $PID "$DAEMON" "$NAME" && exit 0 || exit $?
+		;;
+	*)
+		echo "Usage: $NAME {start|stop|restart|reload|status}" >&2
+		exit 3
+		;;
+esac
+
+:
