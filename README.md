@@ -3,8 +3,10 @@
 ## Installation
 
 ### Debian
-Add the file to /etc/init.d/ and then
+Add pganalyze-collector script to /etc/init.d/
 
+
+Enable it at runtime
 ```
-sudo update-rc.d pganalyze defaults
+sudo update-rc.d pganalyze-collector defaults
 ```

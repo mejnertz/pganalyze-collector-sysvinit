@@ -53,6 +53,7 @@ case "$1" in
 		case "$?" in
 			0|1)
 				do_start
+				;;
 			*)
 				log_end_msg 1
 				;;
